@@ -1,9 +1,9 @@
-const Discord = require('discord.js');
-const client = new Discord.Client();
+const { Client, MessageAttachment } = require('discord.js');
+const client = new Client({
+  partials: ['MESSAGE', 'REACTION', 'CHANNEL'],
+});
 
 require('dotenv').config();
-
-client.login(process.env.BOT_TOKEN);
 
 client.on('ready', () => {
   console.log(`Logged in as ${client.user.tag}!`);
@@ -28,9 +28,22 @@ const jokes = [
   'There are two ways to write error-free programs; only the third one works.',
 ];
 
-client.on('message', (msg) => {
-  if (msg.content === 'Hello') msg.reply('Hi');
-  else if (msg.content === '?joke') {
-    msg.channel.send(jokes[Math.floor(Math.random() * jokes.length)]);
-  };
+client.on('message', (message) => {
+  if (message.content === 'Hello') message.reply('Hi');
+  else if (message.content === '?joke') {
+    message.channel.send(jokes[Math.floor(Math.random() * jokes.length)]);
+  } else if (message.content === 'what is my avatar') {
+    message.reply(message.author.displayAvatarURL());
+  } else if (message.content === '!rip') {
+    const attachment = new MessageAttachment('https://i.imgur.com/w3duR07.png');
+    message.channel.send(attachment);
+  }
 });
+
+client.on('guildMemberAdd', member => {
+  const channel = member.guild.channels.cache.find(ch => ch.name === 'member-log');
+  if (!channel) return;
+  channel.send(`Welcome to the server, ${member}`);
+});
+
+client.login(process.env.BOT_TOKEN);
